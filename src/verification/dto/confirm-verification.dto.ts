@@ -1,11 +1,13 @@
-import { IsString, Length } from 'class-validator';
+import { IsString, IsNotEmpty, Length } from 'class-validator';
 
 export class ConfirmVerificationDto {
-    @IsString()
-    verificationId: string;
-  
-    @IsString()
-    @Length(6, 6)
-    code: string;
+  @IsString()
+  @IsNotEmpty()
+  verificationId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(6, 6)
+  code: string;
 }
     

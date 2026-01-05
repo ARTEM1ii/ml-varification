@@ -39,6 +39,10 @@ export class MailService {
     this.logger.log(`Email transporter initialized: ${host}:${port} (secure: ${isSecure})`);
   }
 
+  isTransporterInitialized(): boolean {
+    return !!this.transporter;
+  }
+
   async sendEmailVerificationCode(email: string, code: string): Promise<void> {
     if (!this.transporter) {
       this.logger.warn(`Skipping email send (no transporter). Email=${email}, code=${code}`);
