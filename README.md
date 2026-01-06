@@ -1,98 +1,297 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 📦 ML Verification
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Email verification service built with NestJS. Provides secure email verification with code-based authentication, expiration handling, and attempt limiting.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Features
 
-## Description
+- Email verification with 6-digit code
+- Code expiration (10 minutes TTL)
+- Attempt limiting (max 5 attempts)
+- Status tracking (PENDING, VERIFIED, FAILED, EXPIRED)
+- Development mode support (returns code in response when email is not configured)
+- In-memory storage (easily replaceable with database)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🛠 Technologies
 
-## Project setup
+- **NestJS** 11 - Progressive Node.js framework
+- **TypeScript** 5.7
+- **Nodemailer** - Email sending
+- **class-validator** - DTO validation
+- **uuid** - Unique identifier generation
 
-```bash
-$ yarn install
-```
+## 📋 Requirements
 
-## Compile and run the project
+- Node.js >= 18
+- yarn (package manager)
+- SMTP server credentials (optional for development)
+
+## ⚙️ Installation
 
 ```bash
-# development
-$ yarn run start
+# Clone the repository
+git clone https://github.com/username/ml-verification.git
+cd ml-verification
 
-# watch mode
-$ yarn run start:dev
+# Install dependencies
+yarn install
 
-# production mode
-$ yarn run start:prod
+# Copy environment variables
+cp .env.example .env
+
+# Edit .env file with your SMTP settings (optional for development)
+
+# Start the application
+yarn start:dev
 ```
 
-## Run tests
+The application will be available at `http://localhost:3000`
+
+## 🔧 Environment Variables
+
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `EMAIL_HOST` | SMTP server hostname | `smtp.gmail.com` | No* |
+| `EMAIL_PORT` | SMTP server port | `587` | No* |
+| `EMAIL_USER` | SMTP username/email | `user@example.com` | No* |
+| `EMAIL_PASSWORD` | SMTP password or app password | `your_password` | No* |
+| `EMAIL_FROM` | Sender email address | `noreply@example.com` | No* |
+
+\* *Required only if you want to send real emails. In development mode, the service will return the verification code in the response.*
+
+### SMTP Configuration Examples
+
+**Gmail:**
+```env
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASSWORD=your_app_password
+EMAIL_FROM=your_email@gmail.com
+```
+*Note: For Gmail, you need to use an [App Password](https://myaccount.google.com/apppasswords), not your regular password.*
+
+**Mailtrap (for testing):**
+```env
+EMAIL_HOST=smtp.mailtrap.io
+EMAIL_PORT=2525
+EMAIL_USER=your_mailtrap_username
+EMAIL_PASSWORD=your_mailtrap_password
+EMAIL_FROM=noreply@example.com
+```
+
+**Yandex:**
+```env
+EMAIL_HOST=smtp.yandex.ru
+EMAIL_PORT=465
+EMAIL_USER=your_email@yandex.ru
+EMAIL_PASSWORD=your_password
+EMAIL_FROM=your_email@yandex.ru
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── verification/          # Verification module
+│   ├── dto/              # Data Transfer Objects
+│   │   ├── request-verification.dto.ts
+│   │   └── confirm-verification.dto.ts
+│   ├── entities/         # Domain entities
+│   │   └── verification.entity.ts
+│   ├── enums/           # Enumerations
+│   │   └── verification-status.enum.ts
+│   ├── repositories/    # Repository pattern
+│   │   ├── verification.repository.ts
+│   │   └── in-memory-verification.repository.ts
+│   ├── verification.controller.ts
+│   ├── verification.service.ts
+│   └── verification.module.ts
+├── mail/                # Email module
+│   ├── templates/       # Email templates
+│   │   └── email-verification.template.ts
+│   ├── mail.service.ts
+│   └── mail.module.ts
+├── app.module.ts
+└── main.ts
+```
+
+## 📜 Scripts
+
+| Command | Description |
+|---------|-------------|
+| `yarn start` | Start the application |
+| `yarn start:dev` | Start in development mode with watch |
+| `yarn start:debug` | Start in debug mode |
+| `yarn start:prod` | Start in production mode |
+| `yarn build` | Build the project |
+| `yarn test` | Run unit tests |
+| `yarn test:watch` | Run tests in watch mode |
+| `yarn test:cov` | Run tests with coverage |
+| `yarn test:e2e` | Run end-to-end tests |
+| `yarn lint` | Run ESLint |
+| `yarn format` | Format code with Prettier |
+
+## 📖 API Documentation
+
+### Base URL
+
+All endpoints are prefixed with `/api`
+
+### Endpoints
+
+#### Request Verification
+
+**POST** `/api/verification/request`
+
+Request a verification code for an email address.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "verificationId": "550e8400-e29b-41d4-a716-446655440000",
+  "expiresAt": "2026-01-05T21:36:29.000Z"
+}
+```
+
+**Response (Development mode - email not configured):**
+```json
+{
+  "verificationId": "550e8400-e29b-41d4-a716-446655440000",
+  "expiresAt": "2026-01-05T21:36:29.000Z",
+  "code": "123456"
+}
+```
+
+**Error Responses:**
+- `400 Bad Request` - Invalid email format
+- `400 Bad Request` - Failed to send verification email (if SMTP configured but failed)
+
+#### Confirm Verification
+
+**POST** `/api/verification/confirm`
+
+Confirm verification with code.
+
+**Request Body:**
+```json
+{
+  "verificationId": "550e8400-e29b-41d4-a716-446655440000",
+  "code": "123456"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "status": "VERIFIED"
+}
+```
+
+**Possible Status Values:**
+- `PENDING` - Verification in progress
+- `VERIFIED` - Successfully verified
+- `FAILED` - Maximum attempts exceeded
+- `EXPIRED` - Code expired
+
+**Error Responses:**
+- `400 Bad Request` - Invalid code
+- `404 Not Found` - Verification not found
+
+### Example Usage
+
+**Using cURL:**
 
 ```bash
-# unit tests
-$ yarn run test
+# Request verification
+curl -X POST http://localhost:3000/api/verification/request \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com"}'
 
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+# Confirm verification
+curl -X POST http://localhost:3000/api/verification/confirm \
+  -H "Content-Type: application/json" \
+  -d '{
+    "verificationId": "550e8400-e29b-41d4-a716-446655440000",
+    "code": "123456"
+  }'
 ```
 
-## Deployment
+**Using Postman:**
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+1. Create a POST request to `http://localhost:3000/api/verification/request`
+2. Set `Content-Type: application/json` in headers
+3. Send JSON body with `email` field
+4. Copy `verificationId` and `code` from response
+5. Create a POST request to `http://localhost:3000/api/verification/confirm`
+6. Send JSON body with `verificationId` and `code`
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## 🔒 Security Features
+
+- **Code Expiration**: Verification codes expire after 10 minutes
+- **Attempt Limiting**: Maximum 5 attempts per verification
+- **Code Cleanup**: Verification code is cleared after successful verification
+- **Status Tracking**: Prevents reuse of verified/failed/expired verifications
+
+## 🧪 Testing
 
 ```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
+# Run unit tests
+yarn test
+
+# Run tests in watch mode
+yarn test:watch
+
+# Run tests with coverage
+yarn test:cov
+
+# Run end-to-end tests
+yarn test:e2e
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 🏗 Architecture
 
-## Resources
+The project follows clean architecture principles:
 
-Check out a few resources that may come in handy when working with NestJS:
+- **Repository Pattern**: Abstract storage layer (currently in-memory, easily replaceable with database)
+- **Service Layer**: Business logic separation
+- **DTO Validation**: Input validation using class-validator
+- **Module-based**: Modular structure for scalability
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## 🔄 Development Mode
 
-## Support
+When email is not configured (no SMTP credentials), the service operates in development mode:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- Verification codes are returned in the API response
+- No actual emails are sent
+- Useful for local development and testing
 
-## Stay in touch
+To enable development mode, simply don't set the email environment variables or use test values like `smtp.example.com`.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## 📝 TODO
 
-## License
+- [ ] Add database persistence (PostgreSQL/MongoDB)
+- [ ] Add rate limiting
+- [ ] Add Redis for distributed storage
+- [ ] Add email template customization
+- [ ] Add webhook support
+- [ ] Add metrics and monitoring
+- [ ] Add comprehensive test coverage
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 👥 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the UNLICENSED License.
